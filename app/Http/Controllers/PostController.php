@@ -34,7 +34,7 @@ class PostController extends Controller
         $validated = $request->validated();
         $post = BlogPost::create($validated);
 
-        return redirect()->route('post.show', ['post' => $post->id])->with('status', 'The blog post was created!');
+        return redirect()->route('posts.show', ['post' => $post->id])->with('status', 'The blog post was created!');
 
 
     }
@@ -44,8 +44,9 @@ class PostController extends Controller
      */
     public function show(string $id)
     {
+        $post = BlogPost::findOrFail($id); // Fetch the post using the $id parameter
+        return view('post.show', ['post' => $post]);
         // abort_if(!isset($this->posts[$id]), 404);
-        return view('post.show', ['post' => BlogPost::findOrFail('id')]);
     }
 
     /**
@@ -67,7 +68,7 @@ class PostController extends Controller
         $post->fill($validated);
         $post->save();
 
-        return redirect()->route('post.show', ['post' => $post->id])->with('status', 'The blog post was updated!');
+        return redirect()->route('posts.show', ['post' => $post->id])->with('status', 'The blog post was updated!');
         
 
 
@@ -81,7 +82,7 @@ class PostController extends Controller
         $post = BlogPost::findOrFail($id);
         $post->delete();
 
-        session()->flash('status', 'Blog Post was Deleted');
+        session()->flash('status', 'Blog Post was Deleted' .' ID: '. $id);
 
         return redirect()->route('posts.index');
     }
