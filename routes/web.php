@@ -44,13 +44,6 @@ Route::resource('posts', PostController::class);
 //     return view('post.index', ['posts' => $posts]);
 // });
 
-
-Route::get('/posts/{post}', function ($id){
-    $post = BlogPost::findOrFail($id); // Fetch the post using the $id parameter
-    return view('post.show', ['post' => $post]);
-})
-->name('post.show');
-
 // Route::get('/posts/{post}/edit', function ($id){
 //     $post = BlogPost::findOrFail($id); // Fetch the post using the $id parameter
 //     return view('post.edit', ['post' => $post]);
