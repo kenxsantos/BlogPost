@@ -6,6 +6,7 @@ use App\Http\Requests\StorePost;
 use App\Models\BlogPost;
 use Faker\Core\Blood;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class PostController extends Controller
 {
@@ -15,7 +16,18 @@ class PostController extends Controller
 
     public function index()
     {
-        return view('post.index', ['posts' => BlogPost::all()]);
+        // DB::connection()->enableQueryLog();
+
+        // $posts = BlogPost::with('comments')->get();
+
+        // foreach ($posts as $post){
+        //     foreach ($post->comments as $comment){
+        //         echo $comment->content;
+        //     }
+        // }
+        // dd(DB::getQueryLog());
+
+        return view('post.index', ['posts' => BlogPost::withCount('comments')->get()]);
     }
 
     /**
@@ -35,8 +47,6 @@ class PostController extends Controller
         $post = BlogPost::create($validated);
 
         return redirect()->route('posts.show', ['post' => $post->id])->with('status', 'The blog post was created!');
-
-
     }
 
     /**
@@ -44,8 +54,8 @@ class PostController extends Controller
      */
     public function show(string $id)
     {
-        $post = BlogPost::findOrFail($id); // Fetch the post using the $id parameter
-        return view('post.show', ['post' => $post]);
+        BlogPost::findOrFail($id); // Fetch the post using the $id parameter
+        return view('post.show', ['post' => BlogPost::with('comments')->findOrFail($id)]);
         // abort_if(!isset($this->posts[$id]), 404);
     }
 
@@ -61,7 +71,7 @@ class PostController extends Controller
      * Update the specified resource in storage.
      */
     public function update(StorePost $request,  $id)
-    {   
+    {
         $post = BlogPost::findOrFail($id);
         $validated = $request->validated();
 
@@ -69,9 +79,6 @@ class PostController extends Controller
         $post->save();
 
         return redirect()->route('posts.show', ['post' => $post->id])->with('status', 'The blog post was updated!');
-        
-
-
     }
 
     /**
@@ -82,7 +89,7 @@ class PostController extends Controller
         $post = BlogPost::findOrFail($id);
         $post->delete();
 
-        session()->flash('status', 'Blog Post was Deleted' .' ID: '. $id);
+        session()->flash('status', 'Blog Post was Deleted' . ' ID: ' . $id);
 
         return redirect()->route('posts.index');
     }
