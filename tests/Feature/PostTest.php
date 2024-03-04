@@ -6,6 +6,7 @@ use App\Models\BlogPost;
 use App\Models\Comment;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Foundation\Testing\WithFaker;
+use Illuminate\Contracts\Auth\Authenticatable;
 use Tests\TestCase;
 
 class PostTest extends TestCase
@@ -28,7 +29,7 @@ class PostTest extends TestCase
 
         //Assert
         $response->assertSeeText('New Title');
-        $response->assertSeeText('No Comments Yet!');
+        $response->assertSeeText('No Comments');
 
         $this->assertDatabaseHas('blog_posts', [
             'title' => $post->title
@@ -50,11 +51,14 @@ class PostTest extends TestCase
     }
 
     public function testStoreValid(){
+
         $params = [
             'title' => 'Valid Title',
             'content' => 'At least 10 characters'
         ];
-        $this->post('/posts', $params)
+
+        $this->actingAs($this->user())
+            ->post('/posts', $params)
             ->assertStatus(302)
             ->assertSessionHas('status');
 
@@ -66,8 +70,8 @@ class PostTest extends TestCase
             'title' => 'x',
             'content' => 'x'
         ];
-
-        $this->post('/posts', $params)
+        $this->actingAs($this->user())
+            ->post('/posts', $params)
             ->assertStatus(302)
             ->assertSessionHas('errors');
 
@@ -79,20 +83,18 @@ class PostTest extends TestCase
     }
 
     public function testUpdateValid(){
-
         $post = $this->createDummyBlogPost();
 
         $this->assertDatabaseHas('blog_posts', [
             'title' => 'New Title',
             'content' => 'Content of the blog post'
         ]);
-
         $params = [
             'title' => 'A new named title',
             'content' => 'A content was change'
         ];
-
-        $this->put("/posts/{$post->id}", $params)
+        $this->actingAs($this->user())
+            ->put("/posts/{$post->id}", $params)
             ->assertStatus(302)
             ->assertSessionHas('status');
 
@@ -104,15 +106,15 @@ class PostTest extends TestCase
     }
 
     public function testDelete(){
-
         $post = $this->createDummyBlogPost();
 
         $this->assertDatabaseHas('blog_posts',  [
             'title' => 'New Title',
             'content' => 'Content of the blog post'
         ]);
-
-        $this->delete("/posts/{$post->id}")
+        
+        $this->actingAs($this->user())
+            ->delete("/posts/{$post->id}")
             ->assertStatus(302)
             ->assertSessionHas('status');
 

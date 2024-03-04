@@ -27,7 +27,7 @@ class BlogPostFactory extends Factory
 
     public function newTitle() {
         return BlogPost::factory()->state([
-            'title' => 'Abigail Otwell',
+            'title' => 'New Title',
             'content' => 'Content of the blog post'
         ]);
     }
