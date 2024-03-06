@@ -4,9 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\StorePost;
 use App\Models\BlogPost;
-use Faker\Core\Blood;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Gate;
 
 class PostController extends Controller
 {
@@ -68,6 +66,16 @@ class PostController extends Controller
      */
     public function edit(string $id)
     {
+        $post = BlogPost::findOrFail($id);
+
+        // if (Gate::denies('update-post', $post)){
+        //     abort(403, 'You cant edit this post');
+        // };
+
+        $this->authorize('posts.update', $post);
+
+
+
         return view('post.edit', ['post' => BlogPost::findOrFail($id)]);
     }
 
@@ -77,6 +85,11 @@ class PostController extends Controller
     public function update(StorePost $request,  $id)
     {
         $post = BlogPost::findOrFail($id);
+
+        // if (Gate::denies('update-post', $post)){
+        //     abort(403, 'You cant edit this post');
+        // };
+        $this->authorize('posts.update', $post);
         $validated = $request->validated();
 
         $post->fill($validated);
@@ -91,6 +104,11 @@ class PostController extends Controller
     public function destroy(string $id)
     {
         $post = BlogPost::findOrFail($id);
+
+        // if (Gate::denies('delete-post', $post)){
+        //     abort(403, 'You cant delete this post');
+        // };
+        $this->authorize('posts.delete', $post);
         $post->delete();
 
         session()->flash('status', 'Blog Post was Deleted' . ' ID: ' . $id);

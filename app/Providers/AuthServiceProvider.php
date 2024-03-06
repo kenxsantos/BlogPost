@@ -4,6 +4,7 @@ namespace App\Providers;
 
 // use Illuminate\Support\Facades\Gate;
 use Illuminate\Foundation\Support\Providers\AuthServiceProvider as ServiceProvider;
+use Illuminate\Support\Facades\Gate;
 
 class AuthServiceProvider extends ServiceProvider
 {
@@ -21,6 +22,35 @@ class AuthServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        //
+        $this->registerPolicies();
+        // Gate::define('update-post', function ($user, $post){
+        //     return $user->id == $post->user_id;
+        // });
+
+        // Gate::define('delete-post', function ($user, $post){
+        //     return $user->id == $post->user_id;
+        // });
+
+        // Gate::define('posts.update', 'App\Policies\BlogPostPolicy@update');
+        // Gate::define('posts.delete', 'App\Policies\BlogPostPolicy@delete');
+
+        Gate::resource('posts', 'App\Policies\BlogPostPolicy');
+
+        //before is the first to be executed
+        // Gate::before(function ($user, $ability){
+        //     if($user->is_admin && in_array($ability, ['posts.update', 'posts.delete'])){
+        //         return true;
+        //     }
+        // });
+
+
+
+        // Gate::after(function ($user, $ability, $result){
+        //     if($user->is_admin){
+        //         return true;
+        //     }
+        // });
+
+        
     }
 }

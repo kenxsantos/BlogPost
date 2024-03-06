@@ -28,7 +28,7 @@
                 <input type="button" value="Register" class="btn btn-primary"
                     onclick="window.location='{{ route('register') }}'">
             @else
-                <input type="submit" value="Log Out {{ Auth::user()->name }}" class="btn btn-primary"
+                <input type="submit" value="Log Out ( {{ Auth::user()->name }} )" class="btn btn-primary"
                     onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
                 <form id="logout-form" action="{{ route('logout') }}" method="POST" style="display: none;">
                     @csrf
