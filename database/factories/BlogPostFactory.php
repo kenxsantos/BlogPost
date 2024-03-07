@@ -21,6 +21,7 @@ class BlogPostFactory extends Factory
         return [
             'title' => fake()->sentence(),
             'content' => fake()->paragraph(),
+            'user_id' => 1
         ];
 
     }
@@ -28,7 +29,8 @@ class BlogPostFactory extends Factory
     public function newTitle() {
         return BlogPost::factory()->state([
             'title' => 'New Title',
-            'content' => 'Content of the blog post'
+            'content' => 'Content of the blog post',
+            'user_id' => 1
         ]);
     }
 }

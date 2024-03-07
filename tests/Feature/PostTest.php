@@ -40,14 +40,10 @@ class PostTest extends TestCase
 
         $post = $this->createDummyBlogPost();
 
-        Comment::factory()->count(4)->create(['blog_post_id' => $post->id]);
-
-     
+        Comment::factory()->count(4)->create(['blog_post_id' => $post->id]);   
         //Act 
         $response = $this->get('/posts');
         $response->assertSeeText('4 comments');
-
-
     }
 
     public function testStoreValid(){
@@ -83,7 +79,8 @@ class PostTest extends TestCase
     }
 
     public function testUpdateValid(){
-        $post = $this->createDummyBlogPost();
+        $user = $this->user();
+        $post = $this->createDummyBlogPost($user->id);
 
         $this->assertDatabaseHas('blog_posts', [
             'title' => 'New Title',
@@ -93,7 +90,7 @@ class PostTest extends TestCase
             'title' => 'A new named title',
             'content' => 'A content was change'
         ];
-        $this->actingAs($this->user())
+        $this->actingAs($user)
             ->put("/posts/{$post->id}", $params)
             ->assertStatus(302)
             ->assertSessionHas('status');
@@ -106,14 +103,15 @@ class PostTest extends TestCase
     }
 
     public function testDelete(){
-        $post = $this->createDummyBlogPost();
+        $user = $this->user();
+        $post = $this->createDummyBlogPost($user->id);
 
         $this->assertDatabaseHas('blog_posts',  [
             'title' => 'New Title',
             'content' => 'Content of the blog post'
         ]);
         
-        $this->actingAs($this->user())
+        $this->actingAs($user)
             ->delete("/posts/{$post->id}")
             ->assertStatus(302)
             ->assertSessionHas('status');
@@ -123,13 +121,16 @@ class PostTest extends TestCase
         // $this->assertSoftDeleted('blog_posts', $post->toArray());
     }
 
-    private function createDummyBlogPost(): BlogPost {
+    private function createDummyBlogPost($userId = null): BlogPost {
         // $post = new BlogPost();
         // $post->title = 'New Title';
         // $post->content = 'Content of the blog post';
         // $post->save();
 
-        return BlogPost::factory()->newTitle()->create();
+        return BlogPost::factory()->newTitle()->create([
+            'user_id' => $userId ?? $this->user()->id,
+
+        ]);
         
         // return $post;
     }

@@ -6,6 +6,15 @@ use App\Http\Requests\StorePost;
 use App\Models\BlogPost;
 use Illuminate\Support\Facades\Gate;
 
+    // Policy methods should use
+    // [
+    //     'show' => 'view'
+    //     'create' => 'create'
+    //     'store' => 'create'
+    //     'edit' => 'update'
+    //     'update' => 'update'
+    //     'destroy' => 'delete'
+    // ]
 class PostController extends Controller
 {
     public function __construct(){
@@ -50,7 +59,6 @@ class PostController extends Controller
 
         return redirect()->route('posts.show', ['post' => $post->id])->with('status', 'The blog post was created!');
     }
-
     /**
      * Display the specified resource.
      */
@@ -58,7 +66,7 @@ class PostController extends Controller
     {
         BlogPost::findOrFail($id); // Fetch the post using the $id parameter
         return view('post.show', ['post' => BlogPost::with('comments')->findOrFail($id)]);
-        // abort_if(!isset($this->posts[$id]), 404);
+        // abort_if(!isset($this->posts[$id]), 404);  
     }
 
     /**
@@ -72,9 +80,8 @@ class PostController extends Controller
         //     abort(403, 'You cant edit this post');
         // };
 
-        $this->authorize('posts.update', $post);
-
-
+        //can remove update convention
+        $this->authorize('update', $post);
 
         return view('post.edit', ['post' => BlogPost::findOrFail($id)]);
     }
@@ -89,7 +96,9 @@ class PostController extends Controller
         // if (Gate::denies('update-post', $post)){
         //     abort(403, 'You cant edit this post');
         // };
-        $this->authorize('posts.update', $post);
+
+         //can remove update convention
+        $this->authorize('update', $post);
         $validated = $request->validated();
 
         $post->fill($validated);
@@ -108,7 +117,9 @@ class PostController extends Controller
         // if (Gate::denies('delete-post', $post)){
         //     abort(403, 'You cant delete this post');
         // };
-        $this->authorize('posts.delete', $post);
+
+         //can remove delete convention
+        $this->authorize('delete', $post);
         $post->delete();
 
         session()->flash('status', 'Blog Post was Deleted' . ' ID: ' . $id);
