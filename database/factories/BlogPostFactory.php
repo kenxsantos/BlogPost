@@ -21,7 +21,7 @@ class BlogPostFactory extends Factory
         return [
             'title' => fake()->sentence(),
             'content' => fake()->paragraph(),
-            'user_id' => 1
+            'created_at' => fake()->dateTimeBetween('-3 months')
         ];
 
     }
@@ -29,8 +29,7 @@ class BlogPostFactory extends Factory
     public function newTitle() {
         return BlogPost::factory()->state([
             'title' => 'New Title',
-            'content' => 'Content of the blog post',
-            'user_id' => 1
+            'content' => 'Content of the blog post'
         ]);
     }
 }

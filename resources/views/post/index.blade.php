@@ -5,12 +5,50 @@
 
 
 @section('content')
-{{-- @each('post.partials.post', $posts, 'post') --}}
-    @forelse ($posts as $key => $post)
-        @include('post.partials.post', [])
-    @empty
-        No found Post
-    @endforelse
-    
-
+    {{-- @each('post.partials.post', $posts, 'post') --}}
+    <div class="row">
+        <div class="col-8">
+            @forelse ($posts as $key => $post)
+                @include('post.partials.post', [])
+            @empty
+                No found Post
+            @endforelse
+        </div>
+        <div class="col-4">
+            <div class="container">
+                <div class="row mb-3">
+                    @card(['title' => 'Most Commented'])
+                        @slot('subtitle')
+                            What people are currently talking
+                        @endslot
+                        @slot('items')
+                            @foreach ($mostCommented as $post)
+                                <li class="list-group-item">
+                                    <a class="text-decoration-none" href="{{ route('posts.show', ['post' => $post->id]) }}">
+                                        {{ $post->title }}
+                                    </a>
+                                </li>
+                            @endforeach
+                        @endslot
+                    @endcard
+                </div>
+                <div class="row mb-3">
+                    @card(['title' => 'Most Active User'])
+                        @slot('subtitle')
+                            List of active users
+                        @endslot
+                        @slot('items', collect($mostActive)->pluck('name'))
+                    @endcard
+                </div>
+                <div class="row mb-3">
+                    @card(['title' => 'Most Active User Last Month'])
+                        @slot('subtitle')
+                            List of active users last month
+                        @endslot
+                        @slot('items', collect($mostActiveLastMonth)->pluck('name'))
+                    @endcard
+                </div>
+            </div>
+        </div>
+    </div>
 @endsection

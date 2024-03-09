@@ -15,6 +15,7 @@ class UsersTableSeeder extends Seeder
         $userCount = (int)$this->command->ask('How many user would you like to add?', 20, 1);
 
         User::factory()->createDummyUser()->create();
+        // User::factory()->create();
         User::factory($userCount)->create();
     }
 }

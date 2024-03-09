@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\StorePost;
 use App\Models\BlogPost;
+use App\Models\User;
 use Illuminate\Support\Facades\Gate;
 
     // Policy methods should use
@@ -38,7 +39,14 @@ class PostController extends Controller
         // }
         // dd(DB::getQueryLog());
 
-        return view('post.index', ['posts' => BlogPost::withCount('comments')->get()]);
+        return view('post.index', 
+        [
+            'posts' => BlogPost::latest()->withCount('comments')->get(),
+            'mostCommented' => BlogPost::mostCommented()->take(5)->get(),
+            'mostActive' => User::withMostBlogPost()->take(5)->get(),
+            'mostActiveLastMonth' => User::withMostBlogPostLastMonth()->take(5)->get(),
+        ]
+        );
     }
 
     /**
@@ -55,6 +63,7 @@ class PostController extends Controller
     public function store(StorePost $request)
     {
         $validated = $request->validated();
+        $validated['user_id'] = $request->user()->id;
         $post = BlogPost::create($validated);
 
         return redirect()->route('posts.show', ['post' => $post->id])->with('status', 'The blog post was created!');
@@ -64,8 +73,15 @@ class PostController extends Controller
      */
     public function show(string $id)
     {
-        BlogPost::findOrFail($id); // Fetch the post using the $id parameter
+         // Fetch the post using the $id parameter
+        // return view('post.show', ['post' => BlogPost::with(['comments' => function ($query) {
+        //     return $query->latest();
+        // }])->findOrFail($id)]);
+
         return view('post.show', ['post' => BlogPost::with('comments')->findOrFail($id)]);
+
+
+
         // abort_if(!isset($this->posts[$id]), 404);  
     }
 

@@ -20,7 +20,7 @@ class CommentsTableSeeder extends Seeder
             return;
         }
 
-        $commentCount = (int)$this->command->ask('How many blog post would you like to add?', 150);
+        $commentCount = (int)$this->command->ask('How many comments would you like to add?', 150);
 
 
          Comment::factory($commentCount)->make()->each(function ($comment) use ($blog_post){
