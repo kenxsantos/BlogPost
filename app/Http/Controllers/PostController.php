@@ -5,20 +5,22 @@ namespace App\Http\Controllers;
 use App\Http\Requests\StorePost;
 use App\Models\BlogPost;
 use App\Models\User;
-use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Facades\Cache;
+use Redis;
 
-    // Policy methods should use
-    // [
-    //     'show' => 'view'
-    //     'create' => 'create'
-    //     'store' => 'create'
-    //     'edit' => 'update'
-    //     'update' => 'update'
-    //     'destroy' => 'delete'
-    // ]
+// Policy methods should use
+// [
+//     'show' => 'view'
+//     'create' => 'create'
+//     'store' => 'create'
+//     'edit' => 'update'
+//     'update' => 'update'
+//     'destroy' => 'delete'
+// ]
 class PostController extends Controller
 {
-    public function __construct(){
+    public function __construct()
+    {
         $this->middleware('auth')
             ->only(['create', 'store', 'edit', 'update', 'destroy']);
     }
@@ -39,13 +41,26 @@ class PostController extends Controller
         // }
         // dd(DB::getQueryLog());
 
-        return view('post.index', 
-        [
-            'posts' => BlogPost::latest()->withCount('comments')->get(),
-            'mostCommented' => BlogPost::mostCommented()->take(5)->get(),
-            'mostActive' => User::withMostBlogPost()->take(5)->get(),
-            'mostActiveLastMonth' => User::withMostBlogPostLastMonth()->take(5)->get(),
-        ]
+        $mostCommented = Cache::tags(['blog-post'])->remember('blog-post-most-commented', 60, function () {
+            return BlogPost::mostCommented()->take(5)->get();
+        });
+
+        $mostActive = Cache::remember('users-most-active', 60, function () {
+            return User::withMostBlogPost()->take(5)->get();
+        });
+
+        $mostActiveLastMonth = Cache::remember('users-most-active-last-month', 60, function () {
+            return User::withMostBlogPostLastMonth()->take(5)->get();
+        });
+
+        return view(
+            'post.index',
+            [
+                'posts' =>  BlogPost::latest()->withCount('comments')->with('user')->get(),
+                'mostCommented' => $mostCommented,
+                'mostActive' => $mostActive,
+                'mostActiveLastMonth' => $mostActiveLastMonth,
+            ]
         );
     }
 
@@ -73,16 +88,55 @@ class PostController extends Controller
      */
     public function show(string $id)
     {
-         // Fetch the post using the $id parameter
+        // Fetch the post using the $id parameter
         // return view('post.show', ['post' => BlogPost::with(['comments' => function ($query) {
         //     return $query->latest();
         // }])->findOrFail($id)]);
 
-        return view('post.show', ['post' => BlogPost::with('comments')->findOrFail($id)]);
+        $bloPost = Cache::tags(['blog-post'])->remember("blog-post-{$id}", 60, function () use ($id) {
+            return BlogPost::with('comments')->findOrFail($id);
+        });
 
+        $sessionId = session()->getId();
+        $counterKey = "blog-post-{$id}-counter";
+        $usersKey = "blog-post-{$id}-users";
 
+        $users = Cache::tags(['blog-post'])->get($usersKey,[]);
+        $usersUpdate = [];
+        $difference = 0;
+        $now = now();
 
-        // abort_if(!isset($this->posts[$id]), 404);  
+        foreach ($users as $session => $lastVisit) {
+            if ($now->diffInMinutes($lastVisit) >= 1) {
+                $difference--;
+            } else {
+                $usersUpdate[$session] = $lastVisit;
+            }
+        }
+
+        if (
+            !array_key_exists($sessionId, $users)
+            || $now->diffInMinutes($users[$sessionId]) >= 1
+        ) {
+            $difference++;
+        }
+
+        $usersUpdate[$sessionId] = $now;
+        Cache::tags(['blog-post'])->forever($usersKey, $usersUpdate);
+
+        if (!Cache::tags(['blog-post'])->has($counterKey)){
+            Cache::tags(['blog-post'])->forever($counterKey, 1);
+        }else{
+            Cache::tags(['blog-post'])->increment($counterKey, $difference);
+        }
+       
+
+        $counter = Cache::tags(['blog-post'])->get($counterKey);
+
+        return view('post.show', [
+            'post' => $bloPost,
+            'counter' => $counter,
+        ]);
     }
 
     /**
@@ -113,7 +167,7 @@ class PostController extends Controller
         //     abort(403, 'You cant edit this post');
         // };
 
-         //can remove update convention
+        //can remove update convention
         $this->authorize('update', $post);
         $validated = $request->validated();
 
@@ -134,7 +188,7 @@ class PostController extends Controller
         //     abort(403, 'You cant delete this post');
         // };
 
-         //can remove delete convention
+        //can remove delete convention
         $this->authorize('delete', $post);
         $post->delete();
 

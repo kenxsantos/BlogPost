@@ -28,21 +28,24 @@
 
 
 <div class="mb-3">
-    @can('update', $post)
-        <a href="{{ route('posts.edit', ['post' => $post->id]) }}" class="btn btn-primary">Edit</a>
-    @endcan
-
+    @auth
+        @can('update', $post)
+            <a href="{{ route('posts.edit', ['post' => $post->id]) }}" class="btn btn-primary">Edit</a>
+        @endcan
+    @endauth
     {{-- 
    @cannot('delete', $post)
        <p>You cannot delete this post!</p>
    @endcannot   --}}
-    @if (!$post->trashed())
-        @can('delete', $post)
-            <form class="d-inline" action="{{ route('posts.destroy', ['post' => $post->id]) }}" method="POST">
-                @csrf
-                @method('DELETE')
-                <input class="btn btn-primary" type="submit" value="Delete">
-            </form>
-        @endcan
-    @endif
+    @auth
+        @if (!$post->trashed())
+            @can('delete', $post)
+                <form class="d-inline" action="{{ route('posts.destroy', ['post' => $post->id]) }}" method="POST">
+                    @csrf
+                    @method('DELETE')
+                    <input class="btn btn-primary" type="submit" value="Delete">
+                </form>
+            @endcan
+        @endif
+    @endauth
 </div>
