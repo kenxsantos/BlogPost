@@ -41,25 +41,11 @@ class PostController extends Controller
         // }
         // dd(DB::getQueryLog());
 
-        $mostCommented = Cache::tags(['blog-post'])->remember('blog-post-most-commented', 60, function () {
-            return BlogPost::mostCommented()->take(5)->get();
-        });
-
-        $mostActive = Cache::remember('users-most-active', 60, function () {
-            return User::withMostBlogPost()->take(5)->get();
-        });
-
-        $mostActiveLastMonth = Cache::remember('users-most-active-last-month', 60, function () {
-            return User::withMostBlogPostLastMonth()->take(5)->get();
-        });
-
         return view(
             'post.index',
             [
-                'posts' =>  BlogPost::latest()->withCount('comments')->with('user')->get(),
-                'mostCommented' => $mostCommented,
-                'mostActive' => $mostActive,
-                'mostActiveLastMonth' => $mostActiveLastMonth,
+                'posts' =>  BlogPost::latest()->withCount('comments')
+                    ->with('user')->with('tags')->get(),
             ]
         );
     }
@@ -94,7 +80,7 @@ class PostController extends Controller
         // }])->findOrFail($id)]);
 
         $bloPost = Cache::tags(['blog-post'])->remember("blog-post-{$id}", 60, function () use ($id) {
-            return BlogPost::with('comments')->findOrFail($id);
+            return BlogPost::with('comments')->with('tags')->with('user')->findOrFail($id);
         });
 
         $sessionId = session()->getId();

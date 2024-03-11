@@ -3,6 +3,7 @@
 use App\Http\Controllers\AboutController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\PostController;
+use App\Http\Controllers\PostTagController;
 use App\Models\BlogPost;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
@@ -36,7 +37,8 @@ Route::prefix('/')->group(function () {
 });
       
 Route::resource('posts', PostController::class);
-
+Route::get('/posts/tag/{tag}', [PostTagController::class, 'index'])
+    ->name('posts.tags.index');
 Auth::routes();
 
 

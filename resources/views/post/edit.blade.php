@@ -6,7 +6,7 @@
     <form action="{{ route('posts.update', ['post' => $post->id]) }}" method="POST">
         @csrf
         @method('PUT')
-        @include('post.partials.form')
+        @include('post.partials._form')
         <div class="d-grid gap-2 mt-1">
             <input class="btn btn-primary" type="submit" value="update">
         </div>
