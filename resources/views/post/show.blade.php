@@ -11,29 +11,32 @@
                     New Post!
                 @endbadge
             </h1>
-        
+
             <p>{{ $post->content }}</p>
-        
+
             @updated(['date' => $post->created_at, 'name' => $post->user->name])
             @endupdated
-        
+
             @updated(['date' => $post->updated_at])
                 Updated
             @endupdated
-        
+
             @tags(['tags' => $post->tags])
             @endtags
-        
+
             <p>Currently read by {{ $counter }} people</p>
-        
+
             <h4>Comments</h4>
+
+            @include('comments._form')
+
             @forelse ($post->comments as $comment)
                 <div>
                     <h5 class="ml-2">{{ $comment->content }}</h5>
-                    @updated(['date' => $post->created_at])
+                    @updated(['date' => $post->created_at, 'name' => $comment->user->name])
                     @endupdated
                 </div>
-        
+
             @empty
                 <p>Be the first one to comment!</p>
             @endforelse
