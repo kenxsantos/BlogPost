@@ -1,9 +1,9 @@
-@extends('layouts.app') 
+@extends('layouts.app')
 
 @section('title', 'Create a Post')
 
 @section('content')
-    <form action="{{ route('posts.store') }}" method="POST">
+    <form action="{{ route('posts.store') }}" method="POST" enctype="multipart/form-data">
         @csrf
         @include('post.partials._form')
         <div class="d-grid gap-2 mt-1">

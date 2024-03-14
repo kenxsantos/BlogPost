@@ -4,8 +4,10 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\StorePost;
 use App\Models\BlogPost;
+use App\Models\Image;
 use App\Models\User;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Storage;
 use Redis;
 
 // Policy methods should use
@@ -62,11 +64,27 @@ class PostController extends Controller
      */
     public function store(StorePost $request)
     {
-        $validated = $request->validated();
-        $validated['user_id'] = $request->user()->id;
-        $post = BlogPost::create($validated);
+        $validatedData = $request->validated();
+        $validatedData['user_id'] = $request->user()->id;
+        $post = BlogPost::create($validatedData);
 
-        return redirect()->route('posts.show', ['post' => $post->id])->with('status', 'The blog post was created!');
+        if($request->hasFile('thumbnail')) {
+            $path = $request->file('thumbnail')->store('thumbnails');
+            
+            if($post->image){
+                Storage::delete($post->image->path);
+                $post->image->path = $path;
+                $post->image->save();
+            }else{
+                $post->image()->save(
+                    Image::create(['path' => $path])
+                );
+            }      
+        }
+        $post->image->save();
+        $request->session()->flash('status', 'Blog post was created!');
+
+        return redirect()->route('posts.show', ['post' => $post->id]);
     }
     /**
      * Display the specified resource.
@@ -78,7 +96,7 @@ class PostController extends Controller
         //     return $query->latest();
         // }])->findOrFail($id)]);
 
-        $bloPost = Cache::tags(['blog-post'])->remember("blog-post-{$id}", 60, function () use ($id) {
+        $blogPost = Cache::tags(['blog-post'])->remember("blog-post-{$id}", 60, function () use ($id) {
             return BlogPost::with('comments', 'tags', 'user', 'comments.user')
                 ->findOrFail($id);
         });
@@ -120,7 +138,7 @@ class PostController extends Controller
         $counter = Cache::tags(['blog-post'])->get($counterKey);
 
         return view('post.show', [
-            'post' => $bloPost,
+            'post' => $blogPost,
             'counter' => $counter,
         ]);
     }
@@ -180,6 +198,6 @@ class PostController extends Controller
 
         session()->flash('status', 'Blog Post was Deleted' . ' ID: ' . $id);
 
-        return redirect()->route('posts.index');
+        return redirect()->route('post.index');
     }
 }

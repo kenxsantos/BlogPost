@@ -34,7 +34,9 @@ class BlogPost extends Model
         return $this->belongsToMany('App\Models\Tag')->withTimestamps();
     }
 
-
+    public function image(){
+        return $this->hasOne('App\Models\Image');
+    }
     public function scopeLatest(Builder $query){
         return $query->orderBy(static::CREATED_AT, 'desc');
     }
