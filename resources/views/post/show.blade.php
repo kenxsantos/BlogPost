@@ -39,18 +39,12 @@
 
         <h4>Comments</h4>
 
-        @include('comments._form')
+        @commentForm (['route' => route('posts.comments.store', ['post' => $post->id])])
+        @endcommentForm
+            
+        @commentList(['comments' => $post->comments])
+        @endcommentList
 
-        @forelse ($post->comments as $comment)
-            <div>
-                <h5 class="ml-2">{{ $comment->content }}</h5>
-                @updated(['date' => $post->created_at, 'name' => $comment->user->name])
-                @endupdated
-            </div>
-
-        @empty
-            <p>Be the first one to comment!</p>
-        @endforelse
     </div>
     <div class="col-4">
         @include('post.partials._activity', [])
