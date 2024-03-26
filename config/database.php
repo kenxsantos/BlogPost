@@ -155,20 +155,20 @@ return [
 
         'default' => [
             'url' => env('REDIS_URL'),
-            'host' => env('REDIS_HOST', '127.0.0.1'),
-            'username' => env('REDIS_USERNAME'),
-            'password' => env('REDIS_PASSWORD'),
-            'port' => env('REDIS_PORT', '6379'),
+            'host' => env('REDIS_HOST', 'redis-10361.c280.us-central1-2.gce.cloud.redislabs.com'),
+            'username' => env('REDIS_USERNAME', 'default'),
+            'password' => env('REDIS_PASSWORD', 'LZW0Uv1UqgdnmKvJws9xHTE35ivbtFMm'),
+            'port' => env('REDIS_PORT', '10361'),
             'database' => env('REDIS_DB', '0'),
         ],
 
         'cache' => [
             'url' => env('REDIS_URL'),
-            'host' => env('REDIS_HOST', '127.0.0.1'),
-            'username' => env('REDIS_USERNAME'),
-            'password' => env('REDIS_PASSWORD'),
-            'port' => env('REDIS_PORT', '6379'),
-            'database' => env('REDIS_CACHE_DB', '1'),
+            'host' => env('REDIS_HOST', 'redis-10361.c280.us-central1-2.gce.cloud.redislabs.com'),
+            'username' => env('REDIS_USERNAME', 'default'),
+            'password' => env('REDIS_PASSWORD', 'LZW0Uv1UqgdnmKvJws9xHTE35ivbtFMm'),
+            'port' => env('REDIS_PORT', '10361'),
+            'database' => env('REDIS_CACHE_DB', '0'),
         ],
 
     ],

@@ -36,11 +36,11 @@ class CommentPosted extends Mailable
     /**
      * Get the message content definition.
      */
-    public function content(): Content
+    public function build()
     {
         $subject = "Commented was posted on your {$this->comment->commentable->title} blog post";
-        return (new Content(
-            $subject))->view('emails.posts.commented');
+        return $this->subject($subject)
+            ->view('emails.posts.commented');
     }
 
     /**
