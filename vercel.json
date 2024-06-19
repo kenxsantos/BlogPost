@@ -6,6 +6,8 @@
     },
     "builds": [
         {
+            "src": "api/index.php",
+            "use": "@vercel/php",
             "config": {
                 "buildCommand": "apt-get update && apt-get install -y libssl1.0.0 && composer install"
             }
