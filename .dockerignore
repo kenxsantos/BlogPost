@@ -1,0 +1,19 @@
+# Ignore development directories and files
+/node_modules
+/vendor
+/storage/*.key
+/public/hot
+/public/storage
+/storage/framework/*
+/storage/logs/*
+/bootstrap/cache/*
+/.env
+
+# Ignore system files
+.DS_Store
+Thumbs.db
+
+# Ignore Docker specific files
+.dockerignore
+.dockerenv
+.dockerignore
