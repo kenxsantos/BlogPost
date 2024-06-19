@@ -1,0 +1,26 @@
+# Use the official PHP image with Apache
+FROM php:7.4-apache
+
+# Install required libraries and dependencies
+RUN apt-get update && \
+    apt-get install -y libssl1.0.0 && \
+    docker-php-ext-install pdo pdo_mysql
+
+# Enable Apache mod_rewrite
+RUN a2enmod rewrite
+
+# Set the working directory
+WORKDIR /var/www/html
+
+# Copy the application code to the container
+COPY . .
+
+# Install Composer and dependencies
+COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
+RUN composer install
+
+# Expose port 80
+EXPOSE 80
+
+# Start Apache server
+CMD ["apache2-foreground"]
