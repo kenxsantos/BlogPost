@@ -68,11 +68,11 @@ class PostController extends Controller
         $validatedData['user_id'] = $request->user()->id;
         $post = BlogPost::create($validatedData);
 
-        if($request->hasFile('thumbnail')) {
+        if ($request->hasFile('thumbnail')) {
             $path = $request->file('thumbnail')->store('thumbnails');
-                $post->image()->save(
-                    Image::make(['path' => $path])
-                );   
+            $post->image()->save(
+                Image::make(['path' => $path])
+            );
         }
         $request->session()->flash('status', 'Blog post was created!');
 
@@ -88,7 +88,7 @@ class PostController extends Controller
         //     return $query->latest();
         // }])->findOrFail($id)]);
 
-        $blogPost = Cache::tags(['blog-post'])->remember("blog-post-{$id}", 60, function () use ($id) {
+        $blogPost = Cache::remember("blog-post-{$id}", 60, function () use ($id) {
             return BlogPost::with('comments', 'tags', 'user', 'comments.user')
                 ->findOrFail($id);
         });
@@ -97,7 +97,7 @@ class PostController extends Controller
         $counterKey = "blog-post-{$id}-counter";
         $usersKey = "blog-post-{$id}-users";
 
-        $users = Cache::tags(['blog-post'])->get($usersKey, []);
+        $users = Cache::get($usersKey, []);
         $usersUpdate = [];
         $difference = 0;
         $now = now();
@@ -118,16 +118,16 @@ class PostController extends Controller
         }
 
         $usersUpdate[$sessionId] = $now;
-        Cache::tags(['blog-post'])->forever($usersKey, $usersUpdate);
+        Cache::forever($usersKey, $usersUpdate);
 
-        if (!Cache::tags(['blog-post'])->has($counterKey)) {
-            Cache::tags(['blog-post'])->forever($counterKey, 1);
+        if (!Cache::has($counterKey)) {
+            Cache::forever($counterKey, 1);
         } else {
-            Cache::tags(['blog-post'])->increment($counterKey, $difference);
+            Cache::increment($counterKey, $difference);
         }
 
 
-        $counter = Cache::tags(['blog-post'])->get($counterKey);
+        $counter = Cache::get($counterKey);
 
         return view('post.show', [
             'post' => $blogPost,
@@ -169,18 +169,18 @@ class PostController extends Controller
 
         $post->fill($validated);
 
-        if($request->hasFile('thumbnail')) {
+        if ($request->hasFile('thumbnail')) {
             $path = $request->file('thumbnail')->store('thumbnails');
-            
-            if($post->image){
+
+            if ($post->image) {
                 Storage::delete($post->image->path);
                 $post->image->path = $path;
                 $post->image->save();
-            }else{
+            } else {
                 $post->image()->save(
                     Image::make(['path' => $path])
                 );
-            }      
+            }
         }
         $post->save();
 

@@ -17,56 +17,63 @@ class BlogPost extends Model
 
     use SoftDeletes;
     use Taggable;
-    
+
     protected $fillable = [
         'title',
         'content',
         'user_id'
     ];
-    
-    public function comments(){
+
+    public function comments()
+    {
         return $this->morphMany('App\Models\Comment', 'commentable')->latest();
     }
 
-    public function user(){
+    public function user()
+    {
         return $this->belongsTo('App\Models\User');
     }
 
-    public function image(){
+    public function image()
+    {
         return $this->morphOne('App\Models\Image', 'imageable');
     }
-    public function scopeLatest(Builder $query){
+    public function scopeLatest(Builder $query)
+    {
         return $query->orderBy(static::CREATED_AT, 'desc');
     }
 
-    public function scopeMostCommented(Builder $query){
+    public function scopeMostCommented(Builder $query)
+    {
         //comment_count
         return $query->withCount('comments')->orderBy('comments_count', 'desc');
     }
 
-    public function scopeLatestWithRelations(Builder $query){
-         return $query->latest()
-         ->withCount('comments')
-         ->with('user')
-         ->with('tags');
+    public function scopeLatestWithRelations(Builder $query)
+    {
+        return $query->latest()
+            ->withCount('comments')
+            ->with('user')
+            ->with('tags');
     }
 
-    public static function boot(){
-        
+    public static function boot()
+    {
+
         static::addGlobalScope(new DeletedAdminScope);
         parent::boot();
 
-        static::deleting(function (BlogPost $blogPost){
-        $blogPost->comments()->delete();
-        Cache::tags(['blog-post'])->forget("blog-post-{$blogPost->id}");
+        static::deleting(function (BlogPost $blogPost) {
+            $blogPost->comments()->delete();
+            Cache::forget("blog-post-{$blogPost->id}");
         });
 
         static::restoring(function (BlogPost $blogPost) {
             $blogPost->comments()->restore();
         });
 
-        static::updating(function (BlogPost $blogPost){
-            Cache::tags(['blog-post'])->forget("blog-post-{$blogPost->id}");
+        static::updating(function (BlogPost $blogPost) {
+            Cache::forget("blog-post-{$blogPost->id}");
         });
     }
 }
